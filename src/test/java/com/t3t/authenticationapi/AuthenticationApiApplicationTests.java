@@ -9,5 +9,4 @@ class AuthenticationApiApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
