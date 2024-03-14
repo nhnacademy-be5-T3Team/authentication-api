@@ -53,7 +53,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Spring Boot.AuthenticationApiApplication">
+  <component name="RunManager" selected="JUnit.AuthenticationApiApplicationTests">
     <configuration name="AuthenticationApiApplicationTests" type="JUnit" factoryName="JUnit" temporary="true" nameIsGenerated="true">
       <module name="authentication-api" />
       <extension name="coverage">
