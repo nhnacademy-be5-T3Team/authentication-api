@@ -1,8 +1,6 @@
 package com.t3t.authenticationapi.account.controller;
 
 import com.t3t.authenticationapi.account.service.DefaultUserDetailsService;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +16,8 @@ public class LoginController {
 
     @PostMapping("/login")
     public String doLogin(HttpServletRequest request){
-        return "jwt token created";
+        // LoginFilter 수행시 successfulAuthentication 메소드가 수행되고 해당 메소드에서 응답이 커밋됨
+        //
+        return null;
     }
 }

@@ -1,12 +1,14 @@
 package com.t3t.authenticationapi.account.filter;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.t3t.authenticationapi.account.auth.CustomUserDetails;
 import com.t3t.authenticationapi.account.component.JWTUtils;
 import com.t3t.authenticationapi.account.dto.LoginDto;
+import org.json.JSONObject;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -20,7 +22,6 @@ import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
@@ -59,7 +60,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication)  {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
 
-        String username = customUserDetails.getUsername();
+        String userId = customUserDetails.getUsername();
 
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
         Iterator<? extends  GrantedAuthority> iterator = authorities.iterator();
@@ -67,12 +68,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = grantedAuthority.getAuthority();
 
-        String access = jwtUtils.createJwt("access", username, role, 600000l); // 10분
-        String refresh = jwtUtils.createJwt("refresh", username, role, 604800000l); // 1주
+        String access = jwtUtils.createJwt("access", userId, role, 600000l); // 10분
+        String refresh = jwtUtils.createJwt("refresh", userId, role, 604800000l); // 1주
 
         response.addHeader("access", "Bearer " + access);
         response.addCookie(createCookie("refresh", refresh));
         request.getSession().setAttribute("refresh", refresh);
+        request.getSession().setMaxInactiveInterval(604800);
         response.setStatus(HttpStatus.OK.value());
     }
 
@@ -85,6 +87,15 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+        String errorMessage = null;
+        if(failed instanceof BadCredentialsException){
+            errorMessage = "invalid id or password";
+        }else{
+            errorMessage = "auth failed";
+        }
+
+        response.setContentType(String.valueOf(MediaType.APPLICATION_JSON));
         response.setStatus(401);
+        response.getWriter().write(new JSONObject().put("error", errorMessage).toString());
     }
 }

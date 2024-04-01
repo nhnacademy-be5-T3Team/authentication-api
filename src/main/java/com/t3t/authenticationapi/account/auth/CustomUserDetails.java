@@ -24,6 +24,7 @@ public class CustomUserDetails implements UserDetails {
                 return userEntity.getRole();
             }
         });
+
         return collection;
     }
 
@@ -32,9 +33,9 @@ public class CustomUserDetails implements UserDetails {
         return userEntity.getPassword();
     }
 
-    @Override
+    @Override //getUserId()를 return시켜서 실제 로그인시 사용되는 id를 못보게 함
     public String getUsername() {
-        return userEntity.getUsername();
+        return userEntity.getUserId();
     }
 
     @Override
