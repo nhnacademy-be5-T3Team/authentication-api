@@ -1,7 +1,8 @@
 package com.t3t.authenticationapi.account.filter;
 
 import com.t3t.authenticationapi.account.component.JWTUtils;
-import io.jsonwebtoken.ExpiredJwtException;
+import com.t3t.authenticationapi.account.service.TokenService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.filter.GenericFilterBean;
 
 import javax.servlet.FilterChain;
@@ -14,12 +15,10 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
 
+@RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
     private final JWTUtils jwtUtils;
-
-    public CustomLogoutFilter(JWTUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
-    }
+    private final TokenService tokenService;
 
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
@@ -47,12 +46,18 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        String refresh = null;
+
+        String refresh = tokenService.findRefreshByAccessToken(access);
+
+        if(Objects.nonNull(access) && Objects.nonNull(refresh)){
+            tokenService.removeRefreshToken(refresh);
+            tokenService.removeAccessToken(access);
+        }
+
+        /*String refresh = null;
         Cookie[] cookies = request.getCookies();
-        Cookie refreshCookie = null;
         for (Cookie cookie : cookies) {
             if(cookie.getName().equals("refresh")){
-                refreshCookie = cookie;
                 refresh = cookie.getValue(); // 쿠키에서 refresh값 꺼내기
             }
         }
@@ -74,15 +79,17 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         if(Objects.nonNull(access) && Objects.nonNull(refresh)){
-            request.getSession().removeAttribute("refresh");
-            request.getSession().invalidate();
+            tokenService.removeAccessToken(access);
+            tokenService.removeRefreshToken(refresh);
+        //    request.getSession().removeAttribute("refresh");
+        //    request.getSession().invalidate();
         }
+*/
 
-
-        Cookie cookie = refreshCookie;
+        Cookie cookie = new Cookie("refresh", "");
         cookie.setValue(null);
         cookie.setMaxAge(0);
-        cookie.setPath(" ");
+        cookie.setPath("");
 
         response.addCookie(cookie);
         response.setStatus(HttpServletResponse.SC_OK);

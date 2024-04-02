@@ -4,8 +4,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.t3t.authenticationapi.account.auth.CustomUserDetails;
 import com.t3t.authenticationapi.account.component.JWTUtils;
 import com.t3t.authenticationapi.account.dto.LoginDto;
+import com.t3t.authenticationapi.account.entity.Access;
+import com.t3t.authenticationapi.account.entity.BlackList;
+import com.t3t.authenticationapi.account.entity.Refresh;
+import com.t3t.authenticationapi.account.service.TokenService;
+import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,14 +31,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 
+@RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtils jwtUtils;
-
-    public LoginFilter(AuthenticationManager authenticationManager, JWTUtils jwtUtils) {
-        this.authenticationManager = authenticationManager;
-        this.jwtUtils = jwtUtils;
-    }
+    private final TokenService tokenService;
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
@@ -71,11 +72,31 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         String access = jwtUtils.createJwt("access", userId, role, 600000l); // 10분
         String refresh = jwtUtils.createJwt("refresh", userId, role, 604800000l); // 1주
 
+        Access accessToken = tokenService.saveAccessToken(Access.builder()
+                .access(access)
+                .refresh(refresh)
+                .role(role)
+                .category("access")
+                .userId(userId)
+                .build());
+        Refresh refreshToken = tokenService.saveRefreshToken(Refresh.builder()
+                        .refresh(refresh)
+                        .userId(userId)
+                        .role(role)
+                        .category("refresh").build());
+
+        tokenService.saveAccessToken(accessToken);
+        tokenService.saveRefreshToken(refreshToken);
+        tokenService.saveBlackListToken(BlackList.builder().access(access).refresh(refresh).build());
+
         response.addHeader("access", "Bearer " + access);
-        response.addCookie(createCookie("refresh", refresh));
-        request.getSession().setAttribute("refresh", refresh);
-        request.getSession().setMaxInactiveInterval(604800);
-        response.setStatus(HttpStatus.OK.value());
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        //response.addHeader("access", "Bearer " + access);
+        //response.addCookie(createCookie("refresh", refresh));
+       // request.getSession().setAttribute("refresh", refresh);
+       // request.getSession().setMaxInactiveInterval(604800);
+        //response.setStatus(HttpStatus.OK.value());
     }
 
     private Cookie createCookie(String key, String value){

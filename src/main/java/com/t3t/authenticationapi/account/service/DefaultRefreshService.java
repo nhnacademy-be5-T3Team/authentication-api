@@ -1,72 +1,90 @@
 package com.t3t.authenticationapi.account.service;
 
 import com.t3t.authenticationapi.account.component.JWTUtils;
-import io.jsonwebtoken.ExpiredJwtException;
-import org.springframework.http.HttpStatus;
+import com.t3t.authenticationapi.account.entity.Access;
+import com.t3t.authenticationapi.account.entity.Refresh;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.util.Objects;
 
 @Service
+@RequiredArgsConstructor
 public class DefaultRefreshService {
     private final JWTUtils jwtUtils;
+    private final TokenService tokenService;
 
-    public DefaultRefreshService(JWTUtils jwtUtils) {
-        this.jwtUtils = jwtUtils;
+    public ResponseEntity<?> sendRefreshToken(HttpServletRequest request, HttpServletResponse response){
+        String[] strs = request.getHeader("access").trim().split(" ");
+        String access = strs[1];
+
+        if(!jwtUtils.isExpired(access)){
+            if(!tokenService.accessTokenExists(access) && tokenService.blackListTokenExists(access)){
+                // 만료된 토큰은 redis에 없음
+                // 하지만 blacklist에는 있어야함
+                String refresh = tokenService.findRefreshByBlackListToken(access);
+                Cookie cookie = new Cookie("refresh", refresh);
+                cookie.setMaxAge(60); // 1분만 생존 (길게 생존하면 탈취 위험)
+                cookie.setHttpOnly(true);
+
+                response.addCookie(cookie);
+                return ResponseEntity.ok().build();
+            }
+        }
+        return null;
     }
 
-    public ResponseEntity<?> createNewRefreshToken(HttpServletRequest request, HttpServletResponse response) {
-        String refresh = null;
+    public ResponseEntity<?> sendAccessToken(HttpServletRequest request, HttpServletResponse response){
+        String[] strs = request.getHeader("access").trim().split(" ");
+        String access = strs[1];
+
         Cookie[] cookies = request.getCookies();
+        String refresh = null;
         for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("refresh")) {
+            if(cookie.getName().equals("refresh")){
                 refresh = cookie.getValue();
             }
         }
-        if(!Objects.equals(refresh,request.getSession().getAttribute("refresh"))){
-            return new ResponseEntity<>("Refresh Token is Expired", HttpStatus.BAD_REQUEST);
-        }
 
-        if (Objects.isNull(refresh)) {
-            return new ResponseEntity<>("Send Token", HttpStatus.BAD_REQUEST);
-        }
-
-        try {
-            jwtUtils.isExpired(refresh);
-        } catch (ExpiredJwtException e) {
-            return new ResponseEntity<>("Token expired", HttpStatus.BAD_REQUEST);
-        }
-
-        if (!jwtUtils.getCategory(refresh).equals("refresh")) {
-            return new ResponseEntity<>("Send Proper Token", HttpStatus.BAD_REQUEST);
+        if(!tokenService.refreshTokenExists(refresh)){
+            return null;
         }
 
         String username = jwtUtils.getUserName(refresh);
         String role = jwtUtils.getRole(refresh);
 
+        tokenService.removeRefreshToken(refresh);
+
         String newAccess = jwtUtils.createJwt("access", username, role, 600000l);
         String newRefresh = jwtUtils.createJwt("refresh", username, role, 604800000l);
 
-        request.getSession().removeAttribute("refresh");
-        request.getSession().invalidate();
+        Access accessToken = Access.builder()
+                .category("access")
+                .userId(username)
+                .access(newAccess)
+                .role(role)
+                .refresh(newRefresh)
+                .build();
 
-        response.setHeader("access", "Bearer " + newAccess);
-        response.addCookie(createCookie("refresh", newRefresh));
+        Refresh refreshToken = Refresh.builder()
+                .refresh(newRefresh)
+                .role(role)
+                .userId(username)
+                .category("refresh").build();
 
-        request.getSession().setAttribute("refresh", newRefresh);
-        // 추가로 시간설정도 해 줘야함. 아직은 안함
+        tokenService.saveAccessToken(accessToken);
+        tokenService.saveRefreshToken(refreshToken);
 
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    private Cookie createCookie(String key, String value) {
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24 * 60 * 60 * 7);
+        Cookie cookie = new Cookie("refresh", "");
         cookie.setHttpOnly(true);
-        return cookie;
+        cookie.setMaxAge(0);
+        cookie.setPath("");
+
+        response.addHeader("access", "Bearer " + newAccess);
+        response.addCookie(cookie);
+        return ResponseEntity.ok().build();
     }
 }

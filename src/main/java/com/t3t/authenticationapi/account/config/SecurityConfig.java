@@ -2,8 +2,9 @@ package com.t3t.authenticationapi.account.config;
 
 import com.t3t.authenticationapi.account.component.JWTUtils;
 import com.t3t.authenticationapi.account.filter.CustomLogoutFilter;
-import com.t3t.authenticationapi.account.filter.JWTFilter;
 import com.t3t.authenticationapi.account.filter.LoginFilter;
+import com.t3t.authenticationapi.account.service.TokenService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,14 +19,11 @@ import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
     private final AuthenticationConfiguration authenticationConfiguration;
     private final JWTUtils jwtUtils;
-
-    public SecurityConfig(AuthenticationConfiguration authenticationConfiguration, JWTUtils jwtUtils) {
-        this.authenticationConfiguration = authenticationConfiguration;
-        this.jwtUtils = jwtUtils;
-    }
+    private final TokenService tokenService;
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
@@ -46,12 +44,13 @@ public class SecurityConfig {
                 .authorizeRequests((auth) -> auth
                         .antMatchers("/login").permitAll()
                         .antMatchers("/refresh").permitAll()
+                        .antMatchers("/reAccess").permitAll()
                         .antMatchers("/logout").authenticated()
                         //.antMatchers("/logout").authenticated()
                         .anyRequest().authenticated())
-                .addFilterBefore(new JWTFilter(jwtUtils), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new CustomLogoutFilter(jwtUtils), LogoutFilter.class)
+                //.addFilterBefore(new JWTFilter(jwtUtils), LoginFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, tokenService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new CustomLogoutFilter(jwtUtils, tokenService), LogoutFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

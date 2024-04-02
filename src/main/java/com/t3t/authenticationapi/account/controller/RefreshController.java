@@ -18,6 +18,11 @@ public class RefreshController {
 
     @PostMapping("/refresh")
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
-        return defaultRefreshService.createNewRefreshToken(request,response);
+        return defaultRefreshService.sendRefreshToken(request,response);
+    }
+
+    @PostMapping("/reAccess")
+    public ResponseEntity<?> reaccess(HttpServletRequest request, HttpServletResponse response){
+        return defaultRefreshService.sendAccessToken(request,response);
     }
 }
