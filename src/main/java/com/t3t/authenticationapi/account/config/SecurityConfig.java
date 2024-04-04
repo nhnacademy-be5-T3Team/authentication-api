@@ -1,7 +1,7 @@
 package com.t3t.authenticationapi.account.config;
 
 import com.t3t.authenticationapi.account.component.JWTUtils;
-import com.t3t.authenticationapi.account.filter.CustomLogoutFilter;
+import com.t3t.authenticationapi.account.filter.LogoutFilter;
 import com.t3t.authenticationapi.account.filter.LoginFilter;
 import com.t3t.authenticationapi.account.service.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -15,7 +15,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.authentication.logout.LogoutFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -44,13 +43,15 @@ public class SecurityConfig {
                 .authorizeRequests((auth) -> auth
                         .antMatchers("/login").permitAll()
                         .antMatchers("/refresh").permitAll()
-                        .antMatchers("/reAccess").permitAll()
+                        .antMatchers("/index").permitAll()
                         .antMatchers("/logout").authenticated()
-                        //.antMatchers("/logout").authenticated()
                         .anyRequest().authenticated())
                 //.addFilterBefore(new JWTFilter(jwtUtils), LoginFilter.class)
+                .logout(logout -> logout
+                        .logoutUrl("/logout") // logout 담당 url
+                        .logoutSuccessUrl("/index")) // logout 성공시 redirect 할 url
                 .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, tokenService), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new CustomLogoutFilter(jwtUtils, tokenService), LogoutFilter.class)
+                .addFilterBefore(new LogoutFilter(jwtUtils, tokenService), org.springframework.security.web.authentication.logout.LogoutFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 

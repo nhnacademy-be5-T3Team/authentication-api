@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.t3t.authenticationapi.account.auth.CustomUserDetails;
 import com.t3t.authenticationapi.account.component.JWTUtils;
 import com.t3t.authenticationapi.account.dto.LoginDto;
-import com.t3t.authenticationapi.account.entity.Access;
-import com.t3t.authenticationapi.account.entity.BlackList;
 import com.t3t.authenticationapi.account.entity.Refresh;
 import com.t3t.authenticationapi.account.service.TokenService;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +28,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.UUID;
 
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
@@ -39,7 +38,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        LoginDto loginDto = new LoginDto();
+        LoginDto loginDto = null;
 
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -69,41 +68,16 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String role = grantedAuthority.getAuthority();
 
-        String access = jwtUtils.createJwt("access", userId, role, 600000l); // 10분
-        String refresh = jwtUtils.createJwt("refresh", userId, role, 604800000l); // 1주
+        String uuid = UUID.randomUUID().toString();
+        String access = jwtUtils.createJwt("access", userId, role, uuid, 900000l); // 15분
+        String refresh = jwtUtils.createJwt("refresh", userId, role, uuid,604800000l); // 1주
 
-        Access accessToken = tokenService.saveAccessToken(Access.builder()
-                .access(access)
-                .refresh(refresh)
-                .role(role)
-                .category("access")
-                .userId(userId)
-                .build());
-        Refresh refreshToken = tokenService.saveRefreshToken(Refresh.builder()
-                        .refresh(refresh)
-                        .userId(userId)
-                        .role(role)
-                        .category("refresh").build());
+        tokenService.saveRefreshToken(Refresh.builder().refresh(refresh).uuid(uuid).build());
 
-        tokenService.saveAccessToken(accessToken);
-        tokenService.saveRefreshToken(refreshToken);
-        tokenService.saveBlackListToken(BlackList.builder().access(access).refresh(refresh).build());
-
-        response.addHeader("access", "Bearer " + access);
+//        response.addCookie(createCookie("access", "Bearer+" + access, 60*15, "/"));
+        response.addCookie(createCookie("access", "Bearer+" + access, 1, "/"));
+        response.addCookie(createCookie("refresh", refresh, 60*60*24*7, "/refresh"));
         response.setStatus(HttpServletResponse.SC_OK);
-
-        //response.addHeader("access", "Bearer " + access);
-        //response.addCookie(createCookie("refresh", refresh));
-       // request.getSession().setAttribute("refresh", refresh);
-       // request.getSession().setMaxInactiveInterval(604800);
-        //response.setStatus(HttpStatus.OK.value());
-    }
-
-    private Cookie createCookie(String key, String value){
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(24*60*60*7); //1주일 동안 유효
-        cookie.setHttpOnly(true); // js 접근불가
-        return cookie;
     }
 
     @Override
@@ -118,5 +92,17 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType(String.valueOf(MediaType.APPLICATION_JSON));
         response.setStatus(401);
         response.getWriter().write(new JSONObject().put("error", errorMessage).toString());
+    }
+
+    private Cookie createCookie(String key, String value, int age, String path){
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(age); //1주일 동안 유효
+        cookie.setHttpOnly(true); // js 접근불가
+//        cookie.setDomain("www.t3t.shop"); // domain 설정
+        cookie.setDomain("localhost");
+        cookie.setSecure(false); // https 설정
+        cookie.setPath(path);
+
+        return cookie;
     }
 }

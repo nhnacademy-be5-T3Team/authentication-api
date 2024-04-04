@@ -31,18 +31,22 @@ public class JWTUtils {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get("category", String.class);
     }
 
-    // before(new Date()) 를 통해서 token의 만료시간이 현재시간보다 이전이다 ? true : false
+    public String getUUID(String token){
+        return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().get("uuid", String.class);
+    }
+    // 만료되었으면 true, 아니면 false
     public Boolean isExpired(String token){
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration().before(new Date());
     }
 
-    public String createJwt(String category, String id, String role, Long expiredMs){
+    public String createJwt(String category, String id, String role, String uuid, Long expiredMs){
         Claims claims = Jwts.claims();
 
         return Jwts.builder()
                 .claim("username", id)
                 .claim("role", role)
                 .claim("category", category)
+                .claim("uuid", uuid)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(key, SignatureAlgorithm.HS256)

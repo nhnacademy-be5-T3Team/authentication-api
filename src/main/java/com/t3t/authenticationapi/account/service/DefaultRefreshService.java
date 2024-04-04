@@ -1,7 +1,6 @@
 package com.t3t.authenticationapi.account.service;
 
 import com.t3t.authenticationapi.account.component.JWTUtils;
-import com.t3t.authenticationapi.account.entity.Access;
 import com.t3t.authenticationapi.account.entity.Refresh;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +9,8 @@ import org.springframework.stereotype.Service;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -17,74 +18,46 @@ public class DefaultRefreshService {
     private final JWTUtils jwtUtils;
     private final TokenService tokenService;
 
-    public ResponseEntity<?> sendRefreshToken(HttpServletRequest request, HttpServletResponse response){
-        String[] strs = request.getHeader("access").trim().split(" ");
-        String access = strs[1];
+    public ResponseEntity<?> sendRefreshToken(HttpServletRequest request, HttpServletResponse response) {
+        String refresh = null;
+        Cookie[] cookies = request.getCookies();
+        for (Cookie cookie : cookies) {
+            if(Objects.equals(cookie.getName(),"refresh")){
+                refresh = cookie.getValue();
+            }
+        }
 
-        if(!jwtUtils.isExpired(access)){
-            if(!tokenService.accessTokenExists(access) && tokenService.blackListTokenExists(access)){
-                // 만료된 토큰은 redis에 없음
-                // 하지만 blacklist에는 있어야함
-                String refresh = tokenService.findRefreshByBlackListToken(access);
-                Cookie cookie = new Cookie("refresh", refresh);
-                cookie.setMaxAge(60); // 1분만 생존 (길게 생존하면 탈취 위험)
-                cookie.setHttpOnly(true);
+        if (!jwtUtils.isExpired(refresh)) { // 토큰이 살아 있는 경우
+            if(tokenService.refreshTokenExists(refresh)){  // 토큰이 레디스에 있다면
+                tokenService.removeRefreshToken(refresh); // 토큰 삭제
 
-                response.addCookie(cookie);
+                String username = jwtUtils.getUserName(refresh);
+                String role = jwtUtils.getRole(refresh);
+
+                String uuid = UUID.randomUUID().toString();
+                String newAccess = jwtUtils.createJwt("access", username, role, uuid,900000l);
+                String newRefresh = jwtUtils.createJwt("refresh", username, role, uuid,604800000l);
+
+                tokenService.saveRefreshToken(Refresh.builder().refresh(newRefresh).uuid(uuid).build()); // 토큰 재저장
+
+                response.addCookie(createCookie("access", "Bearer+" + newAccess, 60*15, "/"));
+                response.addCookie(createCookie("refresh", newRefresh, 60*60*24*7, "/refresh"));
+
                 return ResponseEntity.ok().build();
             }
         }
         return null;
     }
 
-    public ResponseEntity<?> sendAccessToken(HttpServletRequest request, HttpServletResponse response){
-        String[] strs = request.getHeader("access").trim().split(" ");
-        String access = strs[1];
+    private Cookie createCookie(String key, String value, int age, String path){
+        Cookie cookie = new Cookie(key, value);
+        cookie.setMaxAge(age); //1주일 동안 유효
+        cookie.setHttpOnly(true); // js 접근불가
+//        cookie.setDomain("www.t3t.shop"); // domain 설정
+        cookie.setDomain("localhost");
+        cookie.setSecure(false); // https 설정
+        cookie.setPath(path);
 
-        Cookie[] cookies = request.getCookies();
-        String refresh = null;
-        for (Cookie cookie : cookies) {
-            if(cookie.getName().equals("refresh")){
-                refresh = cookie.getValue();
-            }
-        }
-
-        if(!tokenService.refreshTokenExists(refresh)){
-            return null;
-        }
-
-        String username = jwtUtils.getUserName(refresh);
-        String role = jwtUtils.getRole(refresh);
-
-        tokenService.removeRefreshToken(refresh);
-
-        String newAccess = jwtUtils.createJwt("access", username, role, 600000l);
-        String newRefresh = jwtUtils.createJwt("refresh", username, role, 604800000l);
-
-        Access accessToken = Access.builder()
-                .category("access")
-                .userId(username)
-                .access(newAccess)
-                .role(role)
-                .refresh(newRefresh)
-                .build();
-
-        Refresh refreshToken = Refresh.builder()
-                .refresh(newRefresh)
-                .role(role)
-                .userId(username)
-                .category("refresh").build();
-
-        tokenService.saveAccessToken(accessToken);
-        tokenService.saveRefreshToken(refreshToken);
-
-        Cookie cookie = new Cookie("refresh", "");
-        cookie.setHttpOnly(true);
-        cookie.setMaxAge(0);
-        cookie.setPath("");
-
-        response.addHeader("access", "Bearer " + newAccess);
-        response.addCookie(cookie);
-        return ResponseEntity.ok().build();
+        return cookie;
     }
 }
