@@ -5,6 +5,7 @@ import com.t3t.authenticationapi.account.auth.CustomUserDetails;
 import com.t3t.authenticationapi.account.component.JWTUtils;
 import com.t3t.authenticationapi.account.dto.LoginDto;
 import com.t3t.authenticationapi.account.entity.Refresh;
+import com.t3t.authenticationapi.account.exception.JsonFieldNotMatchException;
 import com.t3t.authenticationapi.account.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
@@ -46,7 +47,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
             String messageBody = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
             loginDto = mapper.readValue(messageBody, LoginDto.class);
         }catch (IOException e){
-            throw new RuntimeException(e);
+            throw new JsonFieldNotMatchException(e);
         }
 
         String username = loginDto.getUsername();
@@ -74,8 +75,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         tokenService.saveRefreshToken(Refresh.builder().refresh(refresh).uuid(uuid).build());
 
-//        response.addCookie(createCookie("access", "Bearer+" + access, 60*15, "/"));
-        response.addCookie(createCookie("access", "Bearer+" + access, 1, "/"));
+        response.addCookie(createCookie("access", "Bearer+" + access, 60*15, "/"));
+//        response.addCookie(createCookie("access", "Bearer+" + access, 1, "/"));
         response.addCookie(createCookie("refresh", refresh, 60*60*24*7, "/refresh"));
         response.setStatus(HttpServletResponse.SC_OK);
     }
@@ -98,8 +99,8 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(age); //1주일 동안 유효
         cookie.setHttpOnly(true); // js 접근불가
-//        cookie.setDomain("www.t3t.shop"); // domain 설정
-        cookie.setDomain("localhost");
+        cookie.setDomain("www.t3t.shop"); // domain 설정
+//        cookie.setDomain("localhost");
         cookie.setSecure(false); // https 설정
         cookie.setPath(path);
 

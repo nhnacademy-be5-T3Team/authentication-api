@@ -2,6 +2,8 @@ package com.t3t.authenticationapi.account.service;
 
 import com.t3t.authenticationapi.account.component.JWTUtils;
 import com.t3t.authenticationapi.account.entity.Refresh;
+import com.t3t.authenticationapi.account.exception.TokenHasExpiredException;
+import com.t3t.authenticationapi.account.exception.TokenNotExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -26,8 +28,11 @@ public class DefaultRefreshService {
                 refresh = cookie.getValue();
             }
         }
+        if (Objects.isNull(refresh)){
+            throw new TokenNotExistsException("Refresh Token Not Exists");
+        }
 
-        if (!jwtUtils.isExpired(refresh)) { // 토큰이 살아 있는 경우
+        if (!jwtUtils.isExpired(refresh)) { // Refresh 토큰이 살아 있는 경우
             if(tokenService.refreshTokenExists(refresh)){  // 토큰이 레디스에 있다면
                 tokenService.removeRefreshToken(refresh); // 토큰 삭제
 
@@ -45,16 +50,20 @@ public class DefaultRefreshService {
 
                 return ResponseEntity.ok().build();
             }
+            else{
+                throw new TokenNotExistsException("Send Proper Token");
+            }
+        }else{
+            throw new TokenHasExpiredException("Token has expired");
         }
-        return null;
     }
 
     private Cookie createCookie(String key, String value, int age, String path){
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(age); //1주일 동안 유효
         cookie.setHttpOnly(true); // js 접근불가
-//        cookie.setDomain("www.t3t.shop"); // domain 설정
-        cookie.setDomain("localhost");
+        cookie.setDomain("www.t3t.shop"); // domain 설정
+//        cookie.setDomain("localhost");
         cookie.setSecure(false); // https 설정
         cookie.setPath(path);
 

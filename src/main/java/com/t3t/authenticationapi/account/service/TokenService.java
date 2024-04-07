@@ -2,6 +2,8 @@ package com.t3t.authenticationapi.account.service;
 
 import com.t3t.authenticationapi.account.entity.BlackList;
 import com.t3t.authenticationapi.account.entity.Refresh;
+import com.t3t.authenticationapi.account.exception.TokenAlreadyExistsException;
+import com.t3t.authenticationapi.account.exception.TokenNotExistsException;
 import com.t3t.authenticationapi.account.repository.BlackListRepository;
 import com.t3t.authenticationapi.account.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +19,21 @@ public class TokenService {
 
     public void saveRefreshToken(Refresh refresh){
         if(refreshRepository.existsById(refresh.toString())){
-            throw new RuntimeException("token Already Exists"); // 추후 규격에 맞춘 수정 필요
+            throw new TokenAlreadyExistsException("Token Already Exists");
         }
         refreshRepository.save(refresh);
     }
     public void saveBlackListToken(String blackList){
+        if(refreshRepository.existsById(blackList)){
+            throw new TokenAlreadyExistsException("Token Already Exists");
+        }
         blackListRepository.save(BlackList.builder().blackList(blackList).build());
     }
 
     public void removeRefreshToken(String refresh){
+        if(!refreshRepository.existsById(refresh)){
+            throw new TokenNotExistsException("Token Not Exists");
+        }
         Refresh newRefresh = refreshRepository.findRefreshByRefresh(refresh);
         refreshRepository.delete(newRefresh);
     }
@@ -33,7 +41,7 @@ public class TokenService {
     public void removeRefreshTokenByUUID(String uuid){
         Optional<Refresh> optionalRefresh = refreshRepository.findByUuid(uuid);
         if(!optionalRefresh.isPresent()){
-            throw new RuntimeException("token Already Exists"); // 추후 수정 필요
+            throw new TokenNotExistsException("Token Not Exists");
         }
         refreshRepository.delete(optionalRefresh.get());
     }

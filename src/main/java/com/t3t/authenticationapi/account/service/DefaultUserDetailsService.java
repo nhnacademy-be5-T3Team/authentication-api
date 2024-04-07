@@ -25,15 +25,14 @@ public class DefaultUserDetailsService implements UserDetailsService {
         UserEntityDto userEntityDto = accountRepository.loadUserEntity(username);
 
         if(Objects.isNull(userEntityDto)){
-            throw new UsernameNotFoundException("username not found");
+            throw new UsernameNotFoundException("User Not Found");
         }
 
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(userEntityDto.getUsername());
         userEntity.setUserId(userEntityDto.getUserId());
-//        userEntity.setPassword(userEntityDto.getPassword());
-//        bCryptPasswordEncoder.encode(password)
-        userEntity.setPassword(bCryptPasswordEncoder.encode(userEntityDto.getPassword()));
+        userEntity.setPassword(userEntityDto.getPassword()); // 이게 맞는데 현재 회원에 password가 암호화 되어있지 않음
+//        userEntity.setPassword(bCryptPasswordEncoder.encode(userEntityDto.getPassword()));
         userEntity.setRole(userEntityDto.getRole());
 
 

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.util.Objects;
 
 @RequiredArgsConstructor
-public class LogoutFilter extends GenericFilterBean {
+public class CustomLogoutFilter extends GenericFilterBean {
     private final JWTUtils jwtUtils;
     private final TokenService tokenService;
 
@@ -60,7 +60,7 @@ public class LogoutFilter extends GenericFilterBean {
         cookie.setPath("/refresh");
         cookie.setSecure(false);
         cookie.setHttpOnly(true);
-        cookie.setDomain("localhost");
+        cookie.setDomain("www.t3t.shop");
 
         response.addCookie(cookie);
         response.setStatus(HttpServletResponse.SC_OK);

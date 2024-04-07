@@ -35,7 +35,6 @@ public class RedisConfig {
 
     @Bean
     public RedisConnectionFactory redisConnectionFactory(){
-        //return new LettuceConnectionFactory(host,port);
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(host, port);
         configuration.setPassword(password);
         configuration.setDatabase(database);
@@ -50,22 +49,4 @@ public class RedisConfig {
         redisTemplate.setConnectionFactory(redisConnectionFactory());
         return redisTemplate;
     }
-
-//    @Bean
-//    public static ConfigureRedisAction configureRedisAction(){
-//        return ConfigureRedisAction.NO_OP;
-//    }
-//
-//    @Bean
-//    public RedisMessageListenerContainer container(RedisConnectionFactory connectionFactory){
-//        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-//        container.setConnectionFactory(connectionFactory);
-//        return container;
-//    }
-//
-//    @Bean
-//    MessageListenerAdapter listenerAdapter(Receiver receiver){
-//        return new MessageListenerAdapter(receiver, "receiveMessage");
-//    }
-
 }
