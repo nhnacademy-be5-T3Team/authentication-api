@@ -1,5 +1,6 @@
 package com.t3t.authenticationapi.account.common;
 
+import com.t3t.authenticationapi.account.exception.CookieNotExistException;
 import com.t3t.authenticationapi.account.exception.TokenAlreadyExistsException;
 import com.t3t.authenticationapi.account.exception.TokenHasExpiredException;
 import com.t3t.authenticationapi.account.exception.TokenNotExistsException;
@@ -24,5 +25,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(TokenAlreadyExistsException.class)
     public ResponseEntity<BaseResponse<Void>> handleTokenAlreadyExistsException(TokenAlreadyExistsException tokenAlreadyExistsException){
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new BaseResponse<Void>().message(tokenAlreadyExistsException.getMessage()));
+    }
+
+    @ExceptionHandler(CookieNotExistException.class)
+    public ResponseEntity<BaseResponse<Void>> handleCookieNotExistsException(CookieNotExistException cookieNotExistException){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new BaseResponse<Void>().message(cookieNotExistException.getMessage()));
     }
 }

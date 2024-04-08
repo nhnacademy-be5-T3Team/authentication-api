@@ -35,11 +35,6 @@ public class DefaultUserDetailsService implements UserDetailsService {
 //        userEntity.setPassword(bCryptPasswordEncoder.encode(userEntityDto.getPassword()));
         userEntity.setRole(userEntityDto.getRole());
 
-
-        if(Objects.nonNull(userEntity)){
-            return new CustomUserDetails(userEntity);
-        }
-
-        return null;
+        return new CustomUserDetails(userEntity);
     }
 }

@@ -2,6 +2,7 @@ package com.t3t.authenticationapi.account.service;
 
 import com.t3t.authenticationapi.account.component.JWTUtils;
 import com.t3t.authenticationapi.account.entity.Refresh;
+import com.t3t.authenticationapi.account.exception.CookieNotExistException;
 import com.t3t.authenticationapi.account.exception.TokenHasExpiredException;
 import com.t3t.authenticationapi.account.exception.TokenNotExistsException;
 import lombok.RequiredArgsConstructor;
@@ -22,14 +23,18 @@ public class DefaultRefreshService {
 
     public ResponseEntity<?> sendRefreshToken(HttpServletRequest request, HttpServletResponse response) {
         String refresh = null;
+
         Cookie[] cookies = request.getCookies();
-        for (Cookie cookie : cookies) {
-            if(Objects.equals(cookie.getName(),"refresh")){
-                refresh = cookie.getValue();
+        if(Objects.nonNull(cookies)){
+            for (Cookie cookie : cookies) {
+                if(Objects.equals(cookie.getName(),"refresh")){
+                    refresh = cookie.getValue();
+                }
             }
         }
-        if (Objects.isNull(refresh)){
-            throw new TokenNotExistsException("Refresh Token Not Exists");
+
+        if (Objects.isNull(refresh)){ // refresh token이 없는 경우
+            throw new CookieNotExistException("Cookie Not Exists");
         }
 
         if (!jwtUtils.isExpired(refresh)) { // Refresh 토큰이 살아 있는 경우
@@ -43,7 +48,7 @@ public class DefaultRefreshService {
                 String newAccess = jwtUtils.createJwt("access", username, role, uuid,900000l);
                 String newRefresh = jwtUtils.createJwt("refresh", username, role, uuid,604800000l);
 
-                tokenService.saveRefreshToken(Refresh.builder().refresh(newRefresh).uuid(uuid).build()); // 토큰 재저장
+                tokenService.saveRefreshToken(Refresh.builder().token(newRefresh).uuid(uuid).build()); // 토큰 재저장
 
                 response.addCookie(createCookie("access", "Bearer+" + newAccess, 60*15, "/"));
                 response.addCookie(createCookie("refresh", newRefresh, 60*60*24*7, "/refresh"));

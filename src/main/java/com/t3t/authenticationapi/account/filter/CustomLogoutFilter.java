@@ -42,6 +42,7 @@ public class CustomLogoutFilter extends GenericFilterBean {
                 access = strs[1];
             }
         }
+        System.out.println(access);
         if (Objects.isNull(access)) {
             filterChain.doFilter(request, response);
             return;
@@ -61,8 +62,9 @@ public class CustomLogoutFilter extends GenericFilterBean {
         cookie.setSecure(false);
         cookie.setHttpOnly(true);
         cookie.setDomain("www.t3t.shop");
+//        cookie.setDomain("localhost");
 
         response.addCookie(cookie);
-        response.setStatus(HttpServletResponse.SC_OK);
+        response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }

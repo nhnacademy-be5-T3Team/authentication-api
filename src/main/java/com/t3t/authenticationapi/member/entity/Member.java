@@ -1,9 +1,14 @@
 package com.t3t.authenticationapi.member.entity;
 
-import lombok.*;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.time.LocalDate;
 
 @Getter
@@ -30,11 +35,11 @@ public class Member {
     @Column(name = "member_status")
     private String status;
     @Column(name = "member_role")
-    private Integer role;
+    private String role;
     @Builder
     public Member(Long id, Integer gradeId, String name, String phone, String email,
                   LocalDate birthdate, LocalDate latestLogin, Integer point,
-                  String status, Integer role) {
+                  String status, String role) {
         this.id = id;
         this.gradeId = gradeId;
         this.name = name;

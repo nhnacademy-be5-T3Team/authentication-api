@@ -24,7 +24,7 @@ public class TokenService {
         refreshRepository.save(refresh);
     }
     public void saveBlackListToken(String blackList){
-        if(refreshRepository.existsById(blackList)){
+        if(blackListRepository.existsById(blackList)){
             throw new TokenAlreadyExistsException("Token Already Exists");
         }
         blackListRepository.save(BlackList.builder().blackList(blackList).build());
@@ -34,7 +34,7 @@ public class TokenService {
         if(!refreshRepository.existsById(refresh)){
             throw new TokenNotExistsException("Token Not Exists");
         }
-        Refresh newRefresh = refreshRepository.findRefreshByRefresh(refresh);
+        Refresh newRefresh = refreshRepository.findById(refresh).get();
         refreshRepository.delete(newRefresh);
     }
 
