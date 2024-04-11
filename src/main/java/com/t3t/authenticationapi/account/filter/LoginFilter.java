@@ -22,7 +22,6 @@ import org.springframework.util.StreamUtils;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletInputStream;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -71,13 +70,11 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         String uuid = UUID.randomUUID().toString();
         String access = jwtUtils.createJwt("access", userId, role, uuid, 900000l); // 15분
-        String refresh = jwtUtils.createJwt("refresh", userId, role, uuid,604800000l); // 1주
+        String refresh = jwtUtils.createJwt("refresh", userId, role, uuid,1800000l); // 30분
 
         tokenService.saveRefreshToken(Refresh.builder().token(refresh).uuid(uuid).build());
 
-        response.addCookie(createCookie("access", "Bearer+" + access, 60*15, "/"));
-//        response.addCookie(createCookie("access", "Bearer+" + access, 1, "/"));
-        response.addCookie(createCookie("refresh", refresh, 60*60*24*7, "/refresh"));
+        response.addHeader("Authority", "Bearer " + access);
         response.setStatus(HttpServletResponse.SC_OK);
     }
 
@@ -93,17 +90,5 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.setContentType(String.valueOf(MediaType.APPLICATION_JSON));
         response.setStatus(401);
         response.getWriter().write(new JSONObject().put("error", errorMessage).toString());
-    }
-
-    private Cookie createCookie(String key, String value, int age, String path){
-        Cookie cookie = new Cookie(key, value);
-        cookie.setMaxAge(age); //1주일 동안 유효
-        cookie.setHttpOnly(true); // js 접근불가
-        cookie.setDomain("www.t3t.shop"); // domain 설정
-//        cookie.setDomain("localhost");
-        cookie.setSecure(false); // https 설정
-        cookie.setPath(path);
-
-        return cookie;
     }
 }

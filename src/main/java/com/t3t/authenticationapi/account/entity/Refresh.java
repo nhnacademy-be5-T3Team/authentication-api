@@ -10,7 +10,7 @@ import org.springframework.data.redis.core.index.Indexed;
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@RedisHash(value = "refresh", timeToLive = 604800)
+@RedisHash(value = "refresh", timeToLive = 1800)
 public class Refresh {
     @Id
     private String token;

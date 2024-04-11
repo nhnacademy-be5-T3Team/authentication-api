@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface RefreshRepository extends CrudRepository<Refresh, String> {
     Optional<Refresh> findByUuid(String uuid);
+
+    boolean existsByUuid(String uuid);
 }

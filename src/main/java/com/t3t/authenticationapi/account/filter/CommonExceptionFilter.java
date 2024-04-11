@@ -21,11 +21,11 @@ public class CommonExceptionFilter extends GenericFilterBean {
         try {
             chain.doFilter(request, response);
         } catch(Exception e){
-            handleException((HttpServletRequest) request, (HttpServletResponse) response, e);
+            handleException((HttpServletRequest) request, (HttpServletResponse) response, chain, e);
         }
     }
 
-    private void handleException(HttpServletRequest request, HttpServletResponse response, Exception e) throws IOException {
+    private void handleException(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Exception e) throws IOException, ServletException {
         response.setContentType(String.valueOf(MediaType.APPLICATION_JSON));
         if (e instanceof JsonFieldNotMatchException) {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
@@ -36,7 +36,7 @@ public class CommonExceptionFilter extends GenericFilterBean {
         } else if (e instanceof TokenNotExistsException){
             response.setStatus(HttpServletResponse.SC_FORBIDDEN);
             response.getWriter().write(new JSONObject().put("errorMessage",e.getMessage()).toString());
-        }else {
+        } else {
             response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             response.getWriter().write(new JSONObject().put("errorMessage",e.getMessage()).toString());
         }

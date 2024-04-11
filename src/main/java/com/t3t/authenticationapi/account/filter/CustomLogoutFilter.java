@@ -9,7 +9,6 @@ import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -34,15 +33,14 @@ public class CustomLogoutFilter extends GenericFilterBean {
             filterChain.doFilter(request, response);
             return;
         }
-        Cookie[] cookies = request.getCookies();
-        String access = null;
-        for (Cookie cookie : cookies) {
-            if (cookie.getName().equals("access")) {
-                String[] strs = cookie.getValue().split("\\+");
-                access = strs[1];
-            }
+
+        if(request.getHeader("Authority").isEmpty()){
+            filterChain.doFilter(request, response);
+            return;
         }
-        System.out.println(access);
+
+        String access = request.getHeader("Authority").trim().split(" ")[1];
+
         if (Objects.isNull(access)) {
             filterChain.doFilter(request, response);
             return;
@@ -53,18 +51,11 @@ public class CustomLogoutFilter extends GenericFilterBean {
         }
 
         String uuid = jwtUtils.getUUID(access);
-        tokenService.removeRefreshTokenByUUID(uuid); // redis에 있는 RTK 제거
-        tokenService.saveBlackListToken(access); // transactional 필요?
+        tokenService.saveBlackListToken(access);
+        if(tokenService.refreshTokenExistsByUUID(uuid)){
+            tokenService.removeRefreshTokenByUUID(uuid); // redis에 있는 RTK 제거
+        }
 
-        Cookie cookie = new Cookie("refresh", null);
-        cookie.setMaxAge(0);
-        cookie.setPath("/refresh");
-        cookie.setSecure(false);
-        cookie.setHttpOnly(true);
-        cookie.setDomain("www.t3t.shop");
-//        cookie.setDomain("localhost");
-
-        response.addCookie(cookie);
         response.setStatus(HttpServletResponse.SC_NO_CONTENT);
     }
 }

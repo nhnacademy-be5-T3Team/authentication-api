@@ -49,4 +49,15 @@ public class TokenService {
     public boolean refreshTokenExists(String refresh){
         return refreshRepository.existsById(refresh);
     }
+
+    public String findRefreshByUUID(String uuid){
+        if(refreshRepository.findByUuid(uuid).isEmpty()){
+            throw new TokenNotExistsException("Expired");
+        }
+        return refreshRepository.findByUuid(uuid).get().getToken();
+    }
+
+    public Boolean refreshTokenExistsByUUID(String uuid){
+        return refreshRepository.existsByUuid(uuid);
+    }
 }

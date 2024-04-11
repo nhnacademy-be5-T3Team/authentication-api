@@ -113,4 +113,39 @@ class TokenServiceTest {
         tokenService.refreshTokenExists(refresh);
         Mockito.verify(refreshRepository, Mockito.times(1)).existsById(Mockito.any());
     }
+
+    @Test
+    public void findRefreshByUUIDSuccess(){
+        String uuid = "uuid";
+        Refresh refresh = Refresh.builder().token("token").uuid(uuid).build();
+
+        Mockito.when(refreshRepository.findByUuid(Mockito.anyString())).thenReturn(Optional.of(refresh));
+        String answer = tokenService.findRefreshByUUID(uuid);
+        Mockito.verify(refreshRepository, Mockito.times(2)).findByUuid(Mockito.any());
+    }
+
+    @Test
+    public void findRefreshByUUIDFailed(){
+        String uuid = "uuid";
+
+        Mockito.when(refreshRepository.findByUuid(Mockito.any())).thenReturn(Optional.empty());
+        Assertions.assertThatThrownBy(() -> tokenService.findRefreshByUUID(uuid)).isInstanceOf(TokenNotExistsException.class);
+    }
+
+    @Test
+    public void refreshTokenExistsByUUIDSuccess(){
+        String uuid = "uuid";
+
+        Mockito.when(refreshRepository.existsByUuid(Mockito.any())).thenReturn(true);
+        tokenService.refreshTokenExistsByUUID(uuid);
+        Mockito.verify(refreshRepository, Mockito.times(1)).existsByUuid(uuid);
+    }
+    @Test
+    public void refreshTokenExistsByUUIDFailed(){
+        String uuid = "uuid";
+
+        Mockito.when(refreshRepository.existsByUuid(Mockito.any())).thenReturn(false);
+        tokenService.refreshTokenExistsByUUID(uuid);
+        Mockito.verify(refreshRepository, Mockito.times(1)).existsByUuid(uuid);
+    }
 }

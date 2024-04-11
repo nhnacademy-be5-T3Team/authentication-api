@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 
 @Component
@@ -41,7 +44,6 @@ public class JWTUtils {
 
     public String createJwt(String category, String id, String role, String uuid, Long expiredMs){
         Claims claims = Jwts.claims();
-
         return Jwts.builder()
                 .claim("username", id)
                 .claim("role", role)
@@ -51,5 +53,15 @@ public class JWTUtils {
                 .setExpiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public Boolean checkReIssue(String token){
+        Date expiration = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getExpiration();
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(expiration.toInstant(), ZoneId.systemDefault());
+        Duration duration = Duration.between(LocalDateTime.now(), localDateTime);
+
+        long diffSec = Math.abs(duration.toSeconds());
+
+        return diffSec > 0 && diffSec <= 300;
     }
 }

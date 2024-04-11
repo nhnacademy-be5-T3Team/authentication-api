@@ -18,6 +18,8 @@ public class Account {
     @JoinColumn(name = "member_id")
     @ManyToOne
     private Member member;
+    @Column(name = "deleted")
+    private int deleted;
 
     public Account(String id, Member member){
         this.id = id;
