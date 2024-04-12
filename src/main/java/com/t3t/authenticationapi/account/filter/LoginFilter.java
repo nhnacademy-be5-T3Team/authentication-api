@@ -74,7 +74,7 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
 
         tokenService.saveRefreshToken(Refresh.builder().token(refresh).uuid(uuid).build());
 
-        response.addHeader("Authority", "Bearer " + access);
+        response.addHeader("Authorization", "Bearer " + access);
         response.setStatus(HttpServletResponse.SC_OK);
     }
 

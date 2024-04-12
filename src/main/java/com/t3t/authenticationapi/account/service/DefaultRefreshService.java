@@ -19,10 +19,10 @@ public class DefaultRefreshService {
     private final TokenService tokenService;
 
     public ResponseEntity<?> refresh(HttpServletRequest request, HttpServletResponse response) {
-        if (Objects.isNull(request.getHeader("Authority"))) {
+        if (Objects.isNull(request.getHeader("Authorization"))) {
             throw new TokenNotExistsException("Access Token Not Exists");
         }
-        String access = request.getHeader("Authority").trim().split(" ")[1];
+        String access = request.getHeader("Authorization").trim().split(" ")[1];
         String newAccess = null;
         String refresh = null;
 
@@ -37,7 +37,7 @@ public class DefaultRefreshService {
             if (!jwtUtils.isExpired(refresh)) {
                 newAccess = jwtUtils.createJwt("access", jwtUtils.getUserName(refresh),
                         jwtUtils.getRole(refresh), jwtUtils.getUUID(refresh), 900000l);
-                response.addHeader("Authority", "Bearer " + newAccess);
+                response.addHeader("Authorization", "Bearer " + newAccess);
                 return ResponseEntity.ok().build();
             }
         }
@@ -50,7 +50,7 @@ public class DefaultRefreshService {
         // http 요청이 accesstoken 만료 5분 전이라 자동 로그인 처리
         if (jwtUtils.checkReIssue(access) && tokenService.refreshTokenExists(refresh)) {
             newAccess = jwtUtils.createJwt("access", userId, role, uuid, 900000l);
-            response.addHeader("Authority", "Bearer " + newAccess);
+            response.addHeader("Authorization", "Bearer " + newAccess);
             return ResponseEntity.ok().build();
         }
 
