@@ -34,12 +34,12 @@ public class CustomLogoutFilter extends GenericFilterBean {
             return;
         }
 
-        if(request.getHeader("Authority").isEmpty()){
+        if(request.getHeader("Authorization").isEmpty()){
             filterChain.doFilter(request, response);
             return;
         }
 
-        String access = request.getHeader("Authority").trim().split(" ")[1];
+        String access = request.getHeader("Authorization").trim().split(" ")[1];
 
         if (Objects.isNull(access)) {
             filterChain.doFilter(request, response);
