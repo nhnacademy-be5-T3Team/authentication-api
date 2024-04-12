@@ -39,7 +39,7 @@ class DefaultRefreshServiceTest {
         String refresh = "refresh";
         String uuid = "uuid";
 
-        Mockito.when(request.getHeader("Authority")).thenReturn(access);
+        Mockito.when(request.getHeader("Authorization")).thenReturn(access);
         Mockito.when(tokenService.findRefreshByUUID(Mockito.any())).thenAnswer(new Answer<String>() {
             private int count = 0;
 
@@ -63,7 +63,7 @@ class DefaultRefreshServiceTest {
 
         Assertions.assertAll(
                 () -> Assertions.assertEquals(HttpStatus.OK, result.getStatusCode()),
-                () -> Assertions.assertEquals("Bearer newAccess", response.getHeader("Authority"))
+                () -> Assertions.assertEquals("Bearer newAccess", response.getHeader("Authorization"))
         );
     }
 
@@ -76,7 +76,7 @@ class DefaultRefreshServiceTest {
         String newAccess = "newAccess";
         String refresh = "refresh";
 
-        Mockito.when(request.getHeader("Authority")).thenReturn(access);
+        Mockito.when(request.getHeader("Authorization")).thenReturn(access);
         Mockito.when(tokenService.findRefreshByUUID(Mockito.any())).thenReturn(refresh);
 
         Mockito.when(jwtUtils.getUserName(Mockito.any())).thenReturn("1");
@@ -93,7 +93,7 @@ class DefaultRefreshServiceTest {
 
         Assertions.assertAll(
                 () -> Assertions.assertEquals(HttpStatus.OK, result.getStatusCode()),
-                () -> Assertions.assertEquals("Bearer newAccess", response.getHeader("Authority"))
+                () -> Assertions.assertEquals("Bearer newAccess", response.getHeader("Authorization"))
         );
     }
 
@@ -102,7 +102,7 @@ class DefaultRefreshServiceTest {
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        String header = request.getHeader("Authority");
+        String header = request.getHeader("Authorization");
         Mockito.when(header == null).thenReturn(null);
         Exception exception = Assertions.assertThrows(TokenNotExistsException.class, () -> {
             defaultRefreshService.refresh(request, response);
@@ -116,7 +116,7 @@ class DefaultRefreshServiceTest {
         HttpServletRequest request = Mockito.mock(HttpServletRequest.class);
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        Mockito.when(request.getHeader("Authority")).thenReturn("Bearer validAccessToken");
+        Mockito.when(request.getHeader("Authorization")).thenReturn("Bearer validAccessToken");
 
         Mockito.when(jwtUtils.checkReIssue(Mockito.anyString())).thenReturn(false);
         ResponseEntity<?> responseEntity = defaultRefreshService.refresh(request, response);
