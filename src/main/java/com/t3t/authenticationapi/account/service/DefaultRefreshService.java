@@ -47,12 +47,14 @@ public class DefaultRefreshService {
         String uuid = jwtUtils.getUUID(access);
 
         // access 만료 전, refresh 만료 전
+        // "refresh"로 요청이 들어온 경우
         // http 요청이 accesstoken 만료 5분 전이라 자동 로그인 처리
-        if (jwtUtils.checkReIssue(access) && tokenService.refreshTokenExists(refresh)) {
+        if ((jwtUtils.checkReIssue(access) || !jwtUtils.isExpired(access)) && tokenService.refreshTokenExists(refresh)) {
             newAccess = jwtUtils.createJwt("access", userId, role, uuid, 900000l);
             response.addHeader("Authorization", "Bearer " + newAccess);
             return ResponseEntity.ok().build();
         }
+
 
         // 그 외의 경우는
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

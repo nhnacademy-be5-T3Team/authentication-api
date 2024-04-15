@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .httpBasic().disable()
                 .authorizeRequests((auth) -> auth
                         .antMatchers("/login").permitAll()
+                        .antMatchers("/logins").permitAll()
                         .antMatchers("/refresh").permitAll()
                         .antMatchers("/logout").authenticated()
                         .anyRequest().authenticated())
