@@ -1,7 +1,7 @@
 name: CI-CD
 on:
   push:
-    branches: [ "master" , "develop"]
+    branches: [ "master" , "develop", "feature/ci-cd" ]
 
 jobs:
   build:
