@@ -7,6 +7,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * UserDetails 를 구현하는 CustomUserDetails Class
+ * JWT 토큰에 들어가는 UserId, UserRole, Password를 반환하게 설정함
+ * @author joohyun1996 (이주현)
+ */
 public class CustomUserDetails implements UserDetails {
     private final UserEntity userEntity;
 

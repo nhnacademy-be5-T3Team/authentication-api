@@ -29,13 +29,21 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.UUID;
-
+/**
+ * 로그인 과정을 담당하는 LoginFilter
+ * @author joohyun1996 (이주현)
+ */
 @RequiredArgsConstructor
 public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     private final AuthenticationManager authenticationManager;
     private final JWTUtils jwtUtils;
     private final TokenService tokenService;
-
+    /**
+     * 사용자가 입력한 login 정보를 가지고 인증 시도를 하는 메소드
+     * @param request,response
+     * @return Authentication
+     * @author joohyun1996 (이주현)
+     */
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         LoginDto loginDto = null;
@@ -55,7 +63,14 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(username, password, null);
         return authenticationManager.authenticate(authToken);
     }
-
+    /**
+     * 로그인 성공시 진행되는 메소드
+     * 성공시 UserDetails에서 id, pw, authority 등을 꺼내 jwt 토큰 생성
+     * access token은 response header에 담아 전달, refresh token은 redis에 저장
+     * @return 200_OK, "Authorization : Bearer + accesstoken"
+     * @param request,response,chain,authentication
+     * @author joohyun1996 (이주현)
+     */
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication)  {
         CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
@@ -77,7 +92,12 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
         response.addHeader("Authorization", "Bearer " + access);
         response.setStatus(HttpServletResponse.SC_OK);
     }
-
+    /**
+     * 로그인 실패시 수행되는 메소드
+     * @return 401_Unauthorized, error message
+     * @param request,response,failed
+     * @author joohyun1996 (이주현)
+     */
     @Override
     protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
         String errorMessage = null;

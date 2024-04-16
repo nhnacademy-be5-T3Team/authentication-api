@@ -13,7 +13,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Objects;
-
+/**
+ * CustomLogoutFilter 구현
+ * @author joohyun1996 (이주현)
+ */
 @RequiredArgsConstructor
 public class CustomLogoutFilter extends GenericFilterBean {
     private final JWTUtils jwtUtils;
@@ -23,7 +26,13 @@ public class CustomLogoutFilter extends GenericFilterBean {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         doFilter((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse, filterChain);
     }
-
+    /**
+     * 요청 url, method, header, token을 비교해서 로그아웃 처리
+     * Logout 요청이 수락된 경우, 해당 요청에 사용된 access token은 redis에 저장해 blacklist로 등록한다
+     * @return 204_No_Content
+     * @param request,response,filterChain
+     * @author joohyun1996 (이주현)
+     */
     public void doFilter(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (!request.getRequestURI().matches("^\\/logout$")) {
             filterChain.doFilter(request, response);

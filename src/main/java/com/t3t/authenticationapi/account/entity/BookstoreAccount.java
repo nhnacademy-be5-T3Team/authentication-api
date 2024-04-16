@@ -4,7 +4,10 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
-
+/**
+ * 회원의 password를 저장하는 엔티티
+ * @author joohyun1996 (이주현)
+ */
 @Getter
 @Entity@Table(name = "bookstore_accounts")
 @SuperBuilder

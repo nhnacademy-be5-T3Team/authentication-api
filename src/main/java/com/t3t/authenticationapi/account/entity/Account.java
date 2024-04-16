@@ -5,7 +5,10 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
-
+/**
+ * 회원의 로그인 아이디를 담당하는 엔티티
+ * @author joohyun1996 (이주현)
+ */
 @Getter
 @Entity@Table(name = "accounts")
 @SuperBuilder
