@@ -10,7 +10,10 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-
+/**
+ * redis 연결을 위한 configuration 클래스
+ * @author joohyun1996 (이주현)
+ */
 @Configuration
 @EnableRedisRepositories
 public class RedisConfig {
@@ -31,8 +34,8 @@ public class RedisConfig {
      * getConnection() 호출될 때 마다 새로운 LettuceConnection 생성
      * Thread-safe 하다
      * 동기, 비동기, 리액티브 api 모두 가능
-    */
-
+     * @author joohyun1996 (이주현)
+     */
     @Bean
     public RedisConnectionFactory redisConnectionFactory(){
         RedisStandaloneConfiguration configuration = new RedisStandaloneConfiguration(host, port);

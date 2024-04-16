@@ -12,14 +12,22 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Objects;
-
+/**
+ * UserDetailsService 클래스를 구현하는 Custom Class
+ * @author joohyun1996 (이주현)
+ */
 @Service
 @RequiredArgsConstructor
 public class DefaultUserDetailsService implements UserDetailsService {
     private final AccountRepository accountRepository;
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
-
+    /**
+     * 회원이 입력한 UserName, Password가 Database에 있는지 검증하는 메소드
+     * @param username
+     * @return CustomUserDetails
+     * @author joohyun1996 (이주현)
+     */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         UserEntityDto userEntityDto = accountRepository.loadUserEntity(username);
@@ -31,8 +39,7 @@ public class DefaultUserDetailsService implements UserDetailsService {
         UserEntity userEntity = new UserEntity();
         userEntity.setUsername(userEntityDto.getUsername());
         userEntity.setUserId(userEntityDto.getUserId());
-        userEntity.setPassword(userEntityDto.getPassword()); // 이게 맞는데 현재 회원에 password가 암호화 되어있지 않음
-//        userEntity.setPassword(bCryptPasswordEncoder.encode(userEntityDto.getPassword()));
+        userEntity.setPassword(userEntityDto.getPassword());
         userEntity.setRole(userEntityDto.getRole());
 
         return new CustomUserDetails(userEntity);

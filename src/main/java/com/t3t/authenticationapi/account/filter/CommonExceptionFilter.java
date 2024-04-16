@@ -14,7 +14,10 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-
+/**
+ * Login, Logout Filter에서 발생하는 예외를 공통처리하는 Filter
+ * @author joohyun1996 (이주현)
+ */
 public class CommonExceptionFilter extends GenericFilterBean {
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

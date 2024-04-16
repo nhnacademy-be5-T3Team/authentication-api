@@ -17,7 +17,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
-
+/**
+ * Spring Security 등록을 위한 configuration 클래스
+ * @author joohyun1996 (이주현)
+ */
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
@@ -35,7 +38,12 @@ public class SecurityConfig {
     public BCryptPasswordEncoder bCryptPasswordEncoder(){
         return new BCryptPasswordEncoder();
     }
-
+    /**
+     * Security Filter Chain 설정.
+     * Auth-Server에서는 인증만 담당하기 때문에 다른 URL에 대해서는 설정 X
+     * @param HttpSecurity
+     * @author joohyun1996 (이주현)
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
