@@ -1,11 +1,12 @@
 package com.t3t.authenticationapi.account.component;
 
+import com.t3t.authenticationapi.keymanager.properties.SecretKeyProperties;
+import com.t3t.authenticationapi.keymanager.service.SecretKeyManagerService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
@@ -21,7 +22,8 @@ import java.util.Date;
 @Component
 public class JWTUtils {
     private Key key;
-    public JWTUtils(@Value("${spring.security.key}") String secret) {
+    public JWTUtils(SecretKeyManagerService secretKeyManagerService, SecretKeyProperties secretKeyProperties) {
+        String secret = secretKeyManagerService.getSecretValue(secretKeyProperties.getJwtSecretKeyId());
         byte[] byteSecretKEy = Decoders.BASE64.decode(secret);
         key = Keys.hmacShaKeyFor(byteSecretKEy);
     }

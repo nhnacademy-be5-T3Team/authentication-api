@@ -1,17 +1,4 @@
 spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://133.186.223.228:3306/t3team?useSSL=false&serverTimezone=Asia/Seoul&characterEncoding=UTF-8
-    username: t3team
-    password: uPJQz6QaL6@6h]BG
-  security:
-    key: sakdjA24HSdflasbdglag2yhsdrg342TASGASd58aw4t3AWEIGzsoigbaWEIGHP3tug0ajw4s23a8th24tgaw2854yq3p48ghaa294
-  redis:
-    host: 133.186.223.228
-    password: "*N2vya7H@muDTwdNMR!"
-    port: 6379
-    database: 20
-
   jpa:
     open-in-view: true
     hibernate:
@@ -23,7 +10,6 @@ spring:
     properties:
       hibernate.format_sql: true
       dialect: org.hibernate.dialect.MySQL8InnoDBDialect
-
 
 logging:
   level:

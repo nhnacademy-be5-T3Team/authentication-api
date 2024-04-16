@@ -40,6 +40,7 @@ public class DefaultUserDetailsService implements UserDetailsService {
         userEntity.setUsername(userEntityDto.getUsername());
         userEntity.setUserId(userEntityDto.getUserId());
         userEntity.setPassword(userEntityDto.getPassword());
+//        userEntity.setPassword(bCryptPasswordEncoder.encode(userEntityDto.getPassword()));
         userEntity.setRole(userEntityDto.getRole());
 
         return new CustomUserDetails(userEntity);
