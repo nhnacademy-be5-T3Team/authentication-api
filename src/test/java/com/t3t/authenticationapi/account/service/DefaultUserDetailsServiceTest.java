@@ -13,7 +13,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;*/
 
-/*
+import com.t3t.authenticationapi.account.auth.CustomUserDetails;
+import com.t3t.authenticationapi.account.dto.UserEntityDto;
+import com.t3t.authenticationapi.account.repository.AccountRepository;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
 @ExtendWith(MockitoExtension.class)
 class DefaultUserDetailsServiceTest {
     @Mock
@@ -58,4 +70,4 @@ class DefaultUserDetailsServiceTest {
 
         Assertions.assertEquals("User Not Found", exception.getMessage());
     }
-}*/
+}

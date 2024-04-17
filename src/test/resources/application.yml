@@ -13,14 +13,14 @@ spring:
         format_sql: true
         show_sql: true
   redis:
-    host: 133.186.223.228
-    password: "*N2vya7H@muDTwdNMR!"
-    port: 6379
-    database: 29
-  security:
-    key: sakdjA24HSdflasbdglag2yhsdrg342TASGASd58aw4t3AWEIGzsoigbaWEIGHP3tug0ajw4s23a8th24tgaw2854yq3p48ghaa294
+    host: ${redisHost}
+    password: ${redisPassword}
+    port: ${redisPort}
+    database: ${redisDatabase}
   application:
     name: eureka-client
+  profiles:
+    active: test
 
 eureka:
   instance:
@@ -58,3 +58,5 @@ t3t:
         keyId: "0582f8b117604b7d86e9f3ff26931cde"
       redisServerPassword:
         keyId: "ec1eb8e0706e402cbec8487cbcb86564"
+  token:
+    key: ${jwtSecretKey}

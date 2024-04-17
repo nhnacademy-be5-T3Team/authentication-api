@@ -1,4 +1,4 @@
-package com.t3t.authenticationapi.account.config;
+package com.t3t.authenticationapi.config;
 
 import com.t3t.authenticationapi.account.component.JWTUtils;
 import com.t3t.authenticationapi.account.filter.CommonExceptionFilter;
@@ -41,7 +41,7 @@ public class SecurityConfig {
     /**
      * Security Filter Chain 설정.
      * Auth-Server에서는 인증만 담당하기 때문에 다른 URL에 대해서는 설정 X
-     * @param HttpSecurity
+     * @param http
      * @author joohyun1996 (이주현)
      */
     @Bean
@@ -52,7 +52,6 @@ public class SecurityConfig {
                 .httpBasic().disable()
                 .authorizeRequests((auth) -> auth
                         .antMatchers("/login").permitAll()
-                        .antMatchers("/logins").permitAll()
                         .antMatchers("/refresh").permitAll()
                         .antMatchers("/logout").authenticated()
                         .anyRequest().authenticated())
