@@ -21,7 +21,6 @@ import java.util.Objects;
 public class DefaultUserDetailsService implements UserDetailsService {
     private final AccountRepository accountRepository;
 
-    private final BCryptPasswordEncoder bCryptPasswordEncoder;
     /**
      * 회원이 입력한 UserName, Password가 Database에 있는지 검증하는 메소드
      * @param username
@@ -40,7 +39,6 @@ public class DefaultUserDetailsService implements UserDetailsService {
         userEntity.setUsername(userEntityDto.getUsername());
         userEntity.setUserId(userEntityDto.getUserId());
         userEntity.setPassword(userEntityDto.getPassword());
-//        userEntity.setPassword(bCryptPasswordEncoder.encode(userEntityDto.getPassword()));
         userEntity.setRole(userEntityDto.getRole());
 
         return new CustomUserDetails(userEntity);

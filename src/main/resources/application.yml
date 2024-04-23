@@ -1,4 +1,6 @@
 spring:
+  application:
+    name: AUTH-SERVICE
   jpa:
     open-in-view: true
     hibernate:
@@ -41,3 +43,12 @@ t3t:
         keyId: "0582f8b117604b7d86e9f3ff26931cde"
       redisServerPassword:
         keyId: "ec1eb8e0706e402cbec8487cbcb86564"
+server:
+  port: 8084
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka

@@ -13,11 +13,6 @@ import java.util.Map;
  */
 @RestController
 public class LoginController {
-    private final DefaultUserDetailsService service;
-
-    public LoginController(DefaultUserDetailsService service) {
-        this.service = service;
-    }
     /**
      * LoginFilter 수행시 successfulAuthentication 메소드가 수행되고 해당 메소드에서 응답이 커밋됨
      * @author joohyun1996(이주현)
