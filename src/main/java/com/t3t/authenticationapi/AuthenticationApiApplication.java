@@ -9,9 +9,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 @SpringBootApplication
 @EnableDiscoveryClient
 public class AuthenticationApiApplication {
-
 	public static void main(String[] args) {
 		SpringApplication.run(AuthenticationApiApplication.class, args);
 	}
-
 }
