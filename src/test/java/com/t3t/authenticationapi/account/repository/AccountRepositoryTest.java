@@ -10,6 +10,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+
 @DataJpaTest
 class AccountRepositoryTest {
     @Autowired
@@ -18,7 +20,7 @@ class AccountRepositoryTest {
     private AccountRepository accountRepository;
 
     @Test
-    public void testLoadUserEntity(){
+    public void testLoadUserEntity() {
         Member member = Member.builder()
                 .id(3l)
                 .name("foo")
@@ -28,7 +30,7 @@ class AccountRepositoryTest {
                 .email("2@Mail.com")
                 .birthdate(LocalDate.now())
                 .status("ACTIVE")
-                .latestLogin(LocalDate.now())
+                .latestLogin(LocalDateTime.of(2024, 1, 1, 0, 0))
                 .gradeId(1)
                 .build();
 
