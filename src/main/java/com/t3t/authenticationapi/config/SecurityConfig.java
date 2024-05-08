@@ -1,30 +1,26 @@
 package com.t3t.authenticationapi.config;
 
-import com.t3t.authenticationapi.account.auth.CustomUserDetails;
 import com.t3t.authenticationapi.account.component.CustomAuthenticationProvider;
 import com.t3t.authenticationapi.account.component.JWTUtils;
 import com.t3t.authenticationapi.account.filter.CommonExceptionFilter;
 import com.t3t.authenticationapi.account.filter.CustomLogoutFilter;
 import com.t3t.authenticationapi.account.filter.LoginFilter;
-import com.t3t.authenticationapi.account.service.DefaultUserDetailsService;
 import com.t3t.authenticationapi.account.service.TokenService;
+import com.t3t.authenticationapi.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutFilter;
+
 /**
  * Spring Security 등록을 위한 configuration 클래스
  * @author joohyun1996 (이주현)
@@ -37,6 +33,7 @@ public class SecurityConfig {
     private final JWTUtils jwtUtils;
     private final TokenService tokenService;
     private final CustomAuthenticationProvider provider;
+    private final MemberService memberService;
 
     @Autowired
     public void globalConfigure(AuthenticationManagerBuilder auth) throws Exception{
@@ -67,7 +64,7 @@ public class SecurityConfig {
                         .antMatchers("/logout").authenticated()
                         .anyRequest().authenticated())
                 .addFilterBefore(new CommonExceptionFilter(), LoginFilter.class)
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, tokenService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtils, tokenService, memberService), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new CustomLogoutFilter(jwtUtils, tokenService), LogoutFilter.class)
                 .sessionManagement((session) -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS));
