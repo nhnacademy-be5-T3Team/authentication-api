@@ -8,6 +8,7 @@ import com.t3t.authenticationapi.account.repository.BlackListRepository;
 import com.t3t.authenticationapi.account.repository.RefreshRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 /**
@@ -15,6 +16,7 @@ import java.util.Optional;
  * @author joohyun1996 (이주현)
  */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class TokenService {
     private final RefreshRepository refreshRepository;
