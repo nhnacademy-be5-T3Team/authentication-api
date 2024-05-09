@@ -13,7 +13,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Getter
-@Entity@Table(name = "members")
+@Entity
+@Table(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Member {
     @Id
@@ -37,6 +38,7 @@ public class Member {
     private String status;
     @Column(name = "member_role")
     private String role;
+
     @Builder
     public Member(Long id, Integer gradeId, String name, String phone, String email,
                   LocalDate birthdate, LocalDateTime latestLogin, Integer point,
@@ -55,9 +57,12 @@ public class Member {
 
     /**
      * 마지막 로그인 시간을 갱신한다.
+     *
      * @author woody35545(구건모)
      */
     public void updateLastLogin() {
-        this.latestLogin = LocalDateTime.now();
+        if (!this.status.equals("INACTIVE")) {
+            this.latestLogin = LocalDateTime.now();
+        }
     }
 }
